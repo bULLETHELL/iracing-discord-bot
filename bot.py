@@ -42,10 +42,9 @@ class Bot(commands.AutoShardedBot):
         seasons_list = await Client(USERNAME, PASSWORD).current_seasons()
 
         for season in seasons_list:
-            if season.season_id == 2846:
-                await ctx.send(f'Schedule for {season.series_name_short} ({season.season_year} S{season.season_quarter})')
-                for t in season.tracks:
-                    await ctx.send(f'\tWeek {t.race_week} will take place at {t.name} ({t.config})')
+            await ctx.send(f'Schedule for {season.series_name_short} ({season.season_year} S{season.season_quarter})')
+            for t in season.tracks:
+                await ctx.send(f'\tWeek {t.race_week} will take place at {t.name} ({t.config})')
     def run(self):
         super().run(TOKEN)
 
