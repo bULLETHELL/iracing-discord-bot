@@ -50,7 +50,7 @@ class Bot(commands.AutoShardedBot):
     @commands.command()
     async def series(ctx,*, arg=None):
         if arg==None:
-            ctx.send("Error: missing series category input \n Usage example !series road")
+            await ctx.send("Error: missing series category input \n Usage example !series road")
         elif arg!=None and not arg in SeriesCategories:
             await ctx.send("Error, invalid category\nCategories are road, oval, dirt road and dirt oval")
         else:
