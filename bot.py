@@ -8,7 +8,7 @@ import pyracing
 from dotenv import load_dotenv
 from pyracing.client import Client
 #Global Variables
-SeriesCategories = ['Oval', 'Road', 'Dirt Oval', 'Dirt Road']
+SeriesCategories = ['oval', 'road', 'dirt oval', 'dirt road']
 LicenseClasses = ['R', 'D', 'C','B','A']
 # Discord Bot Token
 load_dotenv()
@@ -48,18 +48,22 @@ class Bot(commands.AutoShardedBot):
                 await ctx.send(f'\tWeek {t.race_week} will take place at {t.name} ({t.config})')
     
     @commands.command()
-    async def series(ctx):
-        listToConvert=[]
-        stringToSend=""         
-        seasons_list = await Client(USERNAME, PASSWORD).current_seasons()
-        for season in seasons_list:
-            if SeriesCategories[season.category-1]=="Road":
-                listToConvert.append([season.series_lic_group_id, season.series_name_short])
-                #stringToSend+= f"{LicenseClasses[season.series_lic_group_id-1]} {season.series_name_short}\n"
-        listToConvert.sort()
-        for x in listToConvert:
-            stringToSend+=f"{LicenseClasses[x[0]-1]} {x[1]} \n"
-        await ctx.send(stringToSend)
+    async def series(ctx,*, arg=None):
+        if arg==None:
+            ctx.send("Error: missing series category input \n Usage example !series road")
+        elif arg!=None and not arg in SeriesCategories:
+            await ctx.send("Error, invalid category\nCategories are road, oval, dirt road and dirt oval")
+        else:
+            listToConvert=[]
+            stringToSend=""         
+            seasons_list = await Client(USERNAME, PASSWORD).current_seasons()
+            for season in seasons_list:
+                if SeriesCategories[season.category-1]==arg:
+                    listToConvert.append([season.series_lic_group_id, season.series_name_short])
+            listToConvert.sort()
+            for x in listToConvert:
+                stringToSend+=f"{LicenseClasses[x[0]-1]} {x[1]} \n"
+            await ctx.send(stringToSend)
 
     def run(self):
         super().run(TOKEN)
