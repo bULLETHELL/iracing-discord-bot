@@ -7,7 +7,9 @@ import inspect
 import pyracing
 from dotenv import load_dotenv
 from pyracing.client import Client
-
+#Global Variables
+SeriesCategories = ['Oval', 'Road', 'Dirt Oval', 'Dirt Road']
+LicenseClasses = ['R', 'D', 'C','B','A']
 # Discord Bot Token
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -32,7 +34,6 @@ class Bot(commands.AutoShardedBot):
             if isinstance(member, commands.Command):
                 if member.parent is None:
                     self.add_command(member)
-
     @commands.command()
     async def test(ctx):
         await ctx.send('test successful')
@@ -45,6 +46,21 @@ class Bot(commands.AutoShardedBot):
             await ctx.send(f'Schedule for {season.series_name_short} ({season.season_year} S{season.season_quarter})')
             for t in season.tracks:
                 await ctx.send(f'\tWeek {t.race_week} will take place at {t.name} ({t.config})')
+    
+    @commands.command()
+    async def series(ctx):
+        listToConvert=[]
+        stringToSend=""         
+        seasons_list = await Client(USERNAME, PASSWORD).current_seasons()
+        for season in seasons_list:
+            if SeriesCategories[season.category-1]=="Road":
+                listToConvert.append([season.series_lic_group_id, season.series_name_short])
+                #stringToSend+= f"{LicenseClasses[season.series_lic_group_id-1]} {season.series_name_short}\n"
+        listToConvert.sort()
+        for x in listToConvert:
+            stringToSend+=f"{LicenseClasses[x[0]-1]} {x[1]} \n"
+        await ctx.send(stringToSend)
+
     def run(self):
         super().run(TOKEN)
 
