@@ -36,16 +36,26 @@ class Bot(commands.AutoShardedBot):
     @commands.command()
     async def test(ctx):
         await ctx.send('test successful')
-    
-    @commands.command()
-    async def season(ctx):
-        seasons_list = await Client(USERNAME, PASSWORD).current_seasons()
 
-        for season in seasons_list:
-            if season.season_id == 2846:
-                await ctx.send(f'Schedule for {season.series_name_short} ({season.season_year} S{season.season_quarter})')
-                for t in season.tracks:
-                    await ctx.send(f'\tWeek {t.race_week} will take place at {t.name} ({t.config})')
+    @commands.command()
+    async def schedule(ctx, *, arg=None):
+        seasons_list = await Client(USERNAME, PASSWORD).current_seasons()
+        out = ''
+
+        if arg is None:
+            out = f'{ctx.author.mention}\nUsage: !schedule "series_name"'
+        else:
+            for season in seasons_list:
+                if season.series_name_short == arg:
+                    out = f'{ctx.author.mention}\nSchedule for {season.series_name_short} ({season.season_year} S{season.season_quarter})\n'
+                    for t in season.tracks:
+                        out += f'\tWeek {t.race_week+1} will take place at {t.name} ({t.config})\n'
+                    break
+                else:
+                    out = f'{ctx.author.mention}\n"{arg}" isn\'t a valid series name.'
+
+        await ctx.send(out)
+
     def run(self):
         super().run(TOKEN)
 
