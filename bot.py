@@ -80,7 +80,11 @@ class Bot(commands.AutoShardedBot):
     @commands.command(name='irating', description='Returns irating of specified driver')
     async def irating(ctx, driver, category):
         ir = await Client(USERNAME, PASSWORD).irating(driver, constants.Category[category].value)
-        await ctx.send(f'Driver {driver}\'s iRating is {ir.current().value} in the {category} category.')
+        embed = discord.Embed(title=f'Driver {driver}\'s iRating')
+        embed.add_field(name='Driver', value=driver)
+        embed.add_field(name='iRating', value=ir.current().value)
+        embed.add_field(name='Category', value=category)
+        await ctx.send(embed=embed)
 
     @commands.command()
     async def paginate(ctx):
