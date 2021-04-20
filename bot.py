@@ -8,6 +8,7 @@ import pyracing
 from dotenv import load_dotenv
 from pyracing.client import Client
 import DiscordUtils
+from pyracing import constants
 #Global Variables
 SeriesCategories = ['oval', 'road', 'dirt oval', 'dirt road']
 LicenseClasses = ['R', 'D', 'C','B','A']
@@ -36,7 +37,7 @@ class Bot(commands.AutoShardedBot):
                 if member.parent is None:
                     self.add_command(member)
 
-    @commands.command()
+    @commands.command(name="schedule", description="Gets schedule of specified series")
     async def schedule(ctx, *, arg=None):
         seasons_list = await Client(USERNAME, PASSWORD).current_seasons()
 
@@ -58,10 +59,10 @@ class Bot(commands.AutoShardedBot):
         #else:
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(name='series', description='Gets all series of specified road type')
     async def series(ctx,*, arg=None):
         if arg==None:
-            ctx.send("Error: missing series category input \n Usage example !series road")
+            await ctx.send("Error: missing series category input \n Usage example !series road")
         elif arg!=None and not arg in SeriesCategories:
             await ctx.send("Error, invalid category\nCategories are road, oval, dirt road and dirt oval")
         else:
@@ -75,7 +76,12 @@ class Bot(commands.AutoShardedBot):
             for x in listToConvert:
                 stringToSend+=f"{LicenseClasses[x[0]-1]} {x[1]} \n"
             await ctx.send(stringToSend)
-    
+
+    @commands.command(name='irating', description='Returns irating of specified driver')
+    async def irating(ctx, driver, category):
+        ir = await Client(USERNAME, PASSWORD).irating(driver, constants.Category[category].value)
+        await ctx.send(f'Driver {driver}\'s iRating is {ir.current().value} in the {category} category.')
+
     @commands.command()
     async def paginate(ctx):
         embed1 = "hello"
