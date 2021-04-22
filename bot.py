@@ -58,6 +58,32 @@ class Bot(commands.AutoShardedBot):
         await ctx.send(out)
 
     @commands.command()
+    async def last(ctx,*,driverId=None):
+        #driverId = 372337#367181
+        lastRaces = await Client(USERNAME, PASSWORD).last_races_stats(driverId)
+        eventResults = await Client(USERNAME,PASSWORD).event_results(driverId, quarter=1, show_unofficial=1)
+        new = await Client(USERNAME,PASSWORD).subsession_data(lastRaces[0].subsession_id)
+        if new.team_drivers_max <= 1: teamEvent=False
+        else: teamEvent = True
+        for d in new.drivers:
+            if int(d.cust_id) == int(driverId) and d.sim_ses_name == "RACE":
+                print(f"{d.display_name},    , {d.car_class_name},    , {d.irating_new-d.irating_old},   , {d.sim_ses_name}")
+            
+            #else: print(d.display_name, d.cust_id, driverId)
+        out="yeet"
+        #out+= f"Track: {lastRaces[0].track}\n"#it
+        #out+= f"SoF: {eventResults[0].strength_of_field}\n"
+        #out+= f"Start Position: {eventResults[0].pos_start}\n"#it
+        #out+= f"Finish Position: {eventResults[0].pos_finish}\n"#it
+        #out+= f"Incidents: {lastRaces[0].incidents}\n"#it
+        
+        #out+= f"{lastRaces[0].subsession_id	}\n"#it
+        #out+= f"{eventResults[0].car_id}\n"#not it
+        print("gigayeet")
+        await ctx.send(out)
+
+
+    @commands.command()
     async def series(ctx,*, arg=None):
         if arg==None:
             await ctx.send("Error: missing series category input \n Usage example !series road")
