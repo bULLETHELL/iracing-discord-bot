@@ -7,6 +7,8 @@ import inspect
 import pyracing
 from dotenv import load_dotenv
 from pyracing.client import Client
+import DiscordUtils
+from pyracing import constants
 #Global Variables
 SeriesCategories = ['oval', 'road', 'dirt oval', 'dirt road']
 LicenseClasses = ['R', 'D', 'C','B','A']
@@ -34,26 +36,28 @@ class Bot(commands.AutoShardedBot):
             if isinstance(member, commands.Command):
                 if member.parent is None:
                     self.add_command(member)
-    @commands.command()
-    async def test(ctx):
-        await ctx.send('test successful')
 
-    @commands.command()
+    @commands.command(name="schedule", description="Gets schedule of specified series")
     async def schedule(ctx, *, arg=None):
         seasons_list = await Client(USERNAME, PASSWORD).current_seasons()
-        out = ''
 
         if arg is None:
-            out = f'{ctx.author.mention}\nUsage: !schedule "series_name"'
+            embed = discord.Embed(title='Usage: !schedule {series_name}')
         else:
             for season in seasons_list:
                 if season.series_name_short == arg:
-                    out = f'{ctx.author.mention}\nSchedule for {season.series_name_short} ({season.season_year} S{season.season_quarter})\n'
+                    embed = discord.Embed(title=f'Schedule for {season.series_name_short} ({season.season_year} S{season.season_quarter})')
                     for t in season.tracks:
-                        out += f'\tWeek {t.race_week+1} will take place at {t.name} ({t.config})\n'
+                        embed.add_field(name=f'Week {t.race_week+1}', value=f'{t.name} ({t.config})', inline=True)
                     break
                 else:
-                    out = f'{ctx.author.mention}\n"{arg}" isn\'t a valid series name.'
+                    embed = discord.Embed(title=f'{arg} isn\'t a valid series name.')
+        # Pagination
+        #if len(out) // 2000 == 1:
+        #    for n in range((len(out)//2000)):
+        #        print("xd")
+        #else:
+        await ctx.send(embed=embed)
 
         await ctx.send(out)
 
@@ -83,7 +87,7 @@ class Bot(commands.AutoShardedBot):
         await ctx.send(out)
 
 
-    @commands.command()
+    @commands.command(name='series', description='Gets all series of specified road type')
     async def series(ctx,*, arg=None):
         if arg==None:
             await ctx.send("Error: missing series category input \n Usage example !series road")
@@ -100,6 +104,29 @@ class Bot(commands.AutoShardedBot):
             for x in listToConvert:
                 stringToSend+=f"{LicenseClasses[x[0]-1]} {x[1]} \n"
             await ctx.send(stringToSend)
+
+    @commands.command(name='irating', description='Returns irating of specified driver')
+    async def irating(ctx, driver, category):
+        ir = await Client(USERNAME, PASSWORD).irating(driver, constants.Category[category].value)
+        embed = discord.Embed(title=f'Driver {driver}\'s iRating')
+        embed.add_field(name='Driver', value=driver)
+        embed.add_field(name='iRating', value=ir.current().value)
+        embed.add_field(name='Category', value=category)
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def paginate(ctx):
+        embed1 = "hello"
+        embed2 = discord.Embed(color=ctx.author.color).add_field(name="Example", value="Page 2")
+        embed3 = discord.Embed(color=ctx.author.color).add_field(name="Example", value="Page 3")
+        paginator = DiscordUtils.Pagination.CustomEmbedPaginator(ctx)
+        paginator.add_reaction('⏮️', "first")
+        paginator.add_reaction('⏪', "back")
+        paginator.add_reaction('🔐', "lock")
+        paginator.add_reaction('⏩', "next")
+        paginator.add_reaction('⏭️', "last")
+        embeds = [embed1, embed2, embed3]
+        await paginator.run(embeds)
 
     def run(self):
         super().run(TOKEN)
