@@ -117,7 +117,7 @@ class Bot(commands.AutoShardedBot):
                     listToConvert.append([season.series_lic_group_id, season.series_name_short])
             listToConvert.sort()
             for x in listToConvert:
-                stringToSend+=f"{LicenseClasses[x[0]-1]}    {x[1]} \n"
+                stringToSend+=f"{constants.License(x[0]).name}     {x[1]} \n"
             await ctx.send(stringToSend)
 
     @commands.command(name='irating', description='Returns irating of specified driver')
