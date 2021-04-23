@@ -63,7 +63,6 @@ class Bot(commands.AutoShardedBot):
 
     @commands.command()
     async def last(ctx,*,driverId=None):
-        #driverId = 372337#367181
         info={
             "driverName": "", "track": "", "car": "", "iratingChange": 0, "startPos": 0, "finishPos": 0, "incidents": 0
         }
