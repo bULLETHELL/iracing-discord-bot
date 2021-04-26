@@ -1,7 +1,7 @@
 # Bot.py
 import os
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import logging
 import inspect
 import pyracing
@@ -37,6 +37,11 @@ class Bot(commands.AutoShardedBot):
                 if member.parent is None:
                     self.add_command(member)
 
+
+    @tasks.loop(seconds=2)
+    async def licenseClassChecker():
+        print("yeeeeeeeeeeeet")
+        
     @commands.command(name="schedule", description="Gets schedule of specified series")
     async def schedule(ctx, *, arg=None):
         seasons_list = await Client(USERNAME, PASSWORD).current_seasons()
