@@ -51,9 +51,16 @@ class Bot(commands.AutoShardedBot):
                 for role in member.roles:
                     if role.name == "Drivers":
                         if not member.id == guild.owner.id:
-                            print(member.id, guild.owner.id)
+                            driver_statuses = await Client(USERNAME,PASSWORD).driver_status(search_terms=member.display_name.split('-')[1])
+                            if len(driver_statuses) != 0:
+                                driver_status = driver_statuses[0]
+                                lc = await Client(USERNAME,PASSWORD).license_class(
+                                    cust_id=driver_status.cust_id,
+                                    category=constants.Category["road"].value
+                                )
+                                await member.edit(nick=f"{lc.current().class_letter()}{lc.current().safety_rating()}-{member.display_name.split('-')[1]}")
+
                         #if member.display_name == "Victor Klaesson":
-                         #   await member.edit(nick="YEEEEEEEEEEEEET")
 
 
     @commands.command(name="schedule", description="Gets schedule of specified series")
