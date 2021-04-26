@@ -5,10 +5,13 @@ from discord.ext import commands
 import logging
 import inspect
 import pyracing
+#import pyracing_bullethell
 from dotenv import load_dotenv
 from pyracing.client import Client
+#from pyracing/bullethell.client import Client
 import DiscordUtils
 from pyracing import constants
+#from pyracing/bullethell import constants
 #Global Variables
 SeriesCategories = ['oval', 'road', 'dirt oval', 'dirt road']
 LicenseClasses = ['R', 'D', 'C','B','A']
@@ -29,7 +32,7 @@ logger.addHandler(handler)
 class Bot(commands.AutoShardedBot):
     def __init__(self):
         super().__init__(command_prefix='!')
-        
+
         # Add commands to self
         members = inspect.getmembers(self)
         for name, member in members:
@@ -79,12 +82,32 @@ class Bot(commands.AutoShardedBot):
 
     @commands.command(name='irating', description='Returns irating of specified driver')
     async def irating(ctx, driver, category):
-        ir = await Client(USERNAME, PASSWORD).irating(driver, constants.Category[category].value)
+        driver_statuses = await Client(USERNAME,PASSWORD).driver_status(search_terms=driver)
+
         embed = discord.Embed(title=f'Driver {driver}\'s iRating')
-        embed.add_field(name='Driver', value=driver)
-        embed.add_field(name='iRating', value=ir.current().value)
-        embed.add_field(name='Category', value=category)
-        await ctx.send(embed=embed)
+
+        if len(driver_statuses) != 0:
+            driver_status = driver_statuses[0]
+            ir = await Client(USERNAME,PASSWORD).irating(
+                cust_id=driver_status.cust_id,
+                category=constants.Category[category].value
+            )
+            lc = await Client(USERNAME,PASSWORD).license_class(
+                cust_id=driver_status.cust_id,
+                category=constants.Category[category].value
+            )
+
+            embed.add_field(name='Driver', value=driver_status.name, inline=True)
+            embed.add_field(name='iRating', value=ir.current().value, inline=True)
+            embed.add_field(
+                name='Safety Rating',
+                value=f'{lc.current().class_letter()} {lc.current().safety_rating()}',
+                inline=True
+            )
+            embed.add_field(name='Category', value=category, inline=True)
+        else:
+            embed.add_field(name='Search', value=f'Driver {driver} not found.')
+        await ctx.reply(embed=embed)
 
     @commands.command()
     async def paginate(ctx):
@@ -106,14 +129,3 @@ class Bot(commands.AutoShardedBot):
 if __name__ == "__main__":
     bot = Bot()
     bot.run()
-
-# Client Class
-class MyClient(discord.Client):
-    async def on_ready(self):
-        print(f"{self.user} has connected to Discord")
-
-    async def on_message(self, message):
-        print(f"Message from {message.author}: {message.content}")
-
-client = MyClient()
-client.run(TOKEN)
