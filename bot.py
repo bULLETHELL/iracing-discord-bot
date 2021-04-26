@@ -44,7 +44,7 @@ class Bot(commands.AutoShardedBot):
                     self.add_command(member)
 
 
-    @tasks.loop(seconds=1.0)
+    @tasks.loop(seconds=3600.0)
     async def licenseClassChecker(self):
         for guild in self.guilds:
             for member in guild.members:
