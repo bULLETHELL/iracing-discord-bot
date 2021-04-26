@@ -31,8 +31,11 @@ logger.addHandler(handler)
 # Bot Class
 class Bot(commands.AutoShardedBot):
     def __init__(self):
-        super().__init__(command_prefix='!')
-
+        intents=discord.Intents.default()
+        intents.members = True
+        super().__init__(command_prefix='!', intents = intents)
+        self.licenseClassChecker.start()
+        
         # Add commands to self
         members = inspect.getmembers(self)
         for name, member in members:
@@ -41,10 +44,25 @@ class Bot(commands.AutoShardedBot):
                     self.add_command(member)
 
 
-    @tasks.loop(seconds=2)
-    async def licenseClassChecker():
-        print("yeeeeeeeeeeeet")
-        
+    @tasks.loop(seconds=3600.0)
+    async def licenseClassChecker(self):
+        for guild in self.guilds:
+            for member in guild.members:
+                for role in member.roles:
+                    if role.name == "Drivers":
+                        if not member.id == guild.owner.id:
+                            driver_statuses = await Client(USERNAME,PASSWORD).driver_status(search_terms=member.display_name.split('-')[1])
+                            if len(driver_statuses) != 0:
+                                driver_status = driver_statuses[0]
+                                lc = await Client(USERNAME,PASSWORD).license_class(
+                                    cust_id=driver_status.cust_id,
+                                    category=constants.Category["road"].value
+                                )
+                                await member.edit(nick=f"{lc.current().class_letter()}{lc.current().safety_rating()}-{member.display_name.split('-')[1]}")
+
+                        #if member.display_name == "Victor Klaesson":
+
+
     @commands.command(name="schedule", description="Gets schedule of specified series")
     async def schedule(ctx, *, arg=None):
         seasons_list = await Client(USERNAME, PASSWORD).current_seasons()
@@ -127,7 +145,7 @@ class Bot(commands.AutoShardedBot):
             for x in listToConvert:
                 stringToSend+=f"{constants.License(x[0]).name}     {x[1]} \n"
             await ctx.send(stringToSend)
-
+        print(ctx.g)
     @commands.command(name='irating', description='Returns irating of specified driver')
     async def irating(ctx, driver, category):
         driver_statuses = await Client(USERNAME,PASSWORD).driver_status(search_terms=driver)
