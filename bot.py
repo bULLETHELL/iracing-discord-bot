@@ -28,7 +28,10 @@ logger.addHandler(handler)
 # Bot Class
 class Bot(commands.AutoShardedBot):
     def __init__(self):
-        super().__init__(command_prefix='!')
+        intents=discord.Intents.default()
+        intents.members = True
+        super().__init__(command_prefix='!', intents = intents)
+        self.licenseClassChecker.start()
         
         # Add commands to self
         members = inspect.getmembers(self)
@@ -38,10 +41,18 @@ class Bot(commands.AutoShardedBot):
                     self.add_command(member)
 
 
-    @tasks.loop(seconds=2)
-    async def licenseClassChecker():
-        print("yeeeeeeeeeeeet")
-        
+    @tasks.loop(seconds=1.0)
+    async def licenseClassChecker(self):
+        for guild in self.guilds:
+            for member in guild.members:
+                for role in member.roles:
+                    if role.name == "Drivers":
+                        if not member.id == guild.owner.id:
+                            print(member.id, guild.owner.id)
+                        #if member.display_name == "Victor Klaesson":
+                         #   await member.edit(nick="YEEEEEEEEEEEEET")
+
+
     @commands.command(name="schedule", description="Gets schedule of specified series")
     async def schedule(ctx, *, arg=None):
         seasons_list = await Client(USERNAME, PASSWORD).current_seasons()
@@ -124,7 +135,7 @@ class Bot(commands.AutoShardedBot):
             for x in listToConvert:
                 stringToSend+=f"{constants.License(x[0]).name}     {x[1]} \n"
             await ctx.send(stringToSend)
-
+        print(ctx.g)
     @commands.command(name='irating', description='Returns irating of specified driver')
     async def irating(ctx, driver, category):
         ir = await Client(USERNAME, PASSWORD).irating(driver, constants.Category[category].value)
