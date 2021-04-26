@@ -1,1 +1,0 @@
-### iRacing Discord Bot
