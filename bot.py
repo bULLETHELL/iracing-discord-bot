@@ -85,8 +85,6 @@ class Bot(commands.AutoShardedBot):
         #else:
         await ctx.send(embed=embed)
 
-        await ctx.send(out)
-
     @commands.command()
     async def last(ctx,*,driverId=None):
         info={
