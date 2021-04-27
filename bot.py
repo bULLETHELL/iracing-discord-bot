@@ -144,6 +144,7 @@ class Bot(commands.AutoShardedBot):
                 stringToSend+=f"{constants.License(x[0]).name}     {x[1]} \n"
             await ctx.send(stringToSend)
         print(ctx.g)
+
     @commands.command(name='irating', description='Returns irating of specified driver')
     async def irating(ctx, driver, category):
         driver_statuses = await Client(USERNAME,PASSWORD).driver_status(search_terms=driver)
