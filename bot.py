@@ -138,12 +138,13 @@ class Bot(commands.AutoShardedBot):
             seasons_list = await Client(USERNAME, PASSWORD).current_seasons()
             for season in seasons_list:
                 if SeriesCategories[season.category-1]==arg:
-                    listToConvert.append([season.series_lic_group_id, season.series_name_short])
+                    listToConvert.append([season.series_lic_group_id, season.series_name_short, season.tracks])
             listToConvert.sort()
             for x in listToConvert:
-                stringToSend+=f"{constants.License(x[0]).name}     {x[1]} \n"
-            await ctx.send(stringToSend)
-        print(ctx.g)
+                if len(x[2]) >= 11:
+                    stringToSend+=f"{constants.License(x[0]).name}     {x[1]}     {x[2][season.race_week].name}\n"
+            await ctx.send(stringToSend[:len(stringToSend)//2])
+            await ctx.send(stringToSend[len(stringToSend)//2:])
 
     @commands.command(name='irating', description='Returns irating of specified driver')
     async def irating(ctx, driver, category):
